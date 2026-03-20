@@ -1,0 +1,61 @@
+{
+    "club_name": "致旋网球俱乐部",
+    "address": "Sydney, Abuklea Rd",
+    "courts": {
+      "type": "室外",
+      "surface": "硬地",
+      "notes": "具体以当天场地情况为准"
+    },
+    "course_types": [
+      "成人零基础入门",
+      "成人进阶提升（发球/正反手/战术）",
+      "青少年课程（13-17岁）"
+    ],
+    "suitable_for": {
+      "adult": [
+        "零基础",
+        "久未运动想恢复",
+        "想系统纠正动作",
+        "想提升发球/对拉/战术"
+      ],
+      "kids": [
+        "13-17岁提升"
+      ]
+    },
+    "lesson_format": [
+      "一对一私教",
+      "一对二私教",
+      "固定小班课（3-6人）",
+      "灵活小班课（4人）"
+    ],
+    "price_per_hour_per_person": {
+      "one_on_one": 120,
+      "one_on_two": 100,
+      "fixed_group_three": 70,
+      "fixed_group_four": 50,
+      "fixed_group_five": 40,
+      "fixed_group_six": 30,
+      "flexible_group": 60
+    },
+    "trial": {
+      "supported": true,
+      "how": "可预约一次体验课，具体时间与教练档期以沟通为准"
+    },
+    "common_time_slots": [
+      "工作日晚上 18:00-23:00",
+      "周末白天 9:00-23:00"
+    ],
+    "enrollment": {
+      "how_to_contact": [
+        "app store下载Topspin APP，查看教练和课程，预约试听",
+        "私聊Head Coach老林，留言希望参加的课程和时间"
+      ],
+      "notes": "我们会安排合适的教练与时间"
+    },
+    "human_confirmation_boundary": [
+      "退款、投诉、合同、发票、法律承诺、维权相关",
+      "场地临时调整、天气原因安排变动",
+      "长期课程规划与比赛报名等个性化承诺"
+    ]
+  }
+

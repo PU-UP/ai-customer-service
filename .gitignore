@@ -1,0 +1,41 @@
+# Environment (DO NOT commit secrets)
+.env
+.env.local
+
+# Local virtual environments
+venv/
+.venv/
+
+# uv / uv toolchain artifacts
+.python-version
+uv.lock
+pyproject.toml
+__pypackages__/
+.uv/
+
+# Python cache / tooling
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.tox/
+
+# Test / coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# SQLite runtime DB files (created at runtime)
+*.db
+*.sqlite
+app/data/
+app/data/*.db
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+

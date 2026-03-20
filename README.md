@@ -1,1 +1,132 @@
-# ai-customer-service
+# AI Customer Service
+
+这是一个可切换渠道 + 可切换场景的智能客服项目：
+- `channel`：外部输入输出方式（企业微信 webhook / 终端）
+- `core`：客服策略与 LLM 编排
+- `scenario`：个性化资产（`system_prompt.txt` / `club_profile.json` / `faq.json`）
+
+---
+
+## 1. 快速开始（推荐）
+
+### 第一步：准备环境变量
+在项目根目录创建 `.env`（可由 `.env.example` 复制）：
+
+```bash
+cp .env.example .env
+```
+
+然后按你的实际环境填写密钥（尤其是企业微信和 LLM key）。
+
+### 第二步：选择运行模式
+在 `.env` 中设置：
+
+- `CHANNEL_DRIVER=wecom_webhook` 或 `CHANNEL_DRIVER=terminal_cli`
+- `SCENARIO=tennis_club`（未来可替换成其它场景）
+
+### 第三步：启动
+
+```bash
+python run_customer_service.py
+```
+
+仅需要根目录启动即可。
+
+---
+
+## 2. 两种使用方式
+
+### A) 终端模式（本地调试最快）
+配置：
+
+```env
+CHANNEL_DRIVER=terminal_cli
+SCENARIO=tennis_club
+```
+
+启动后直接在终端输入问题，输入 `exit` 退出。
+
+适合：
+- 快速验证 FAQ/提示词效果
+- 不依赖企业微信联调
+
+### B) 企业微信 Webhook 模式（线上接入）
+配置：
+
+```env
+CHANNEL_DRIVER=wecom_webhook
+SCENARIO=tennis_club
+```
+
+并确保以下环境变量正确：
+- `TOKEN`
+- `ENCODING_AES_KEY`
+- `CORP_ID`
+- `CORP_SECRET`
+- `LLM_API_KEY`（或 `OPENAI_API_KEY` / `ALI_API_KEY` / `DASHSCOPE_API_KEY`）
+
+启动后提供：
+- `GET /wechat`：企业微信验签
+- `POST /wechat`：消息回调入口
+
+---
+
+## 3. 场景切换用法（核心）
+
+默认场景目录结构：
+
+```text
+app/scenarios/<SCENARIO>/
+├─ system_prompt.txt
+├─ club_profile.json
+└─ faq.json
+```
+
+例如当前：
+
+```text
+app/scenarios/tennis_club/
+```
+
+你要切换到另一个业务（比如足球俱乐部）时：
+1. 新建 `app/scenarios/football_club/`
+2. 放入这 3 个文件
+3. 将 `.env` 改为 `SCENARIO=football_club`
+4. 重启服务
+
+不需要改 `core` 代码。
+
+---
+
+## 4. 关键配置说明（.env）
+
+- `CHANNEL_DRIVER`：渠道驱动  
+  - `wecom_webhook`：企业微信
+  - `terminal_cli`：终端交互
+- `SCENARIO`：场景名称（决定默认资产目录）
+- `SYSTEM_PROMPT_PATH`：可选，手动覆盖 prompt 路径
+- `CLUB_PROFILE_PATH`：可选，手动覆盖 profile 路径
+- `FAQ_PATH`：可选，手动覆盖 FAQ 路径
+- `SQLITE_PATH`：SQLite 文件路径（默认在 `app/data/`）
+
+---
+
+## 5. 目录用途（简版）
+
+```text
+app/
+├─ channels/   # 外部接入层
+├─ core/       # 智能客服核心
+├─ db/         # 数据访问层代码（不是数据库文件）
+├─ data/       # 运行时数据文件目录（db 文件在这里）
+└─ scenarios/  # 场景资产目录
+```
+
+---
+
+## 6. 注意事项
+
+- `.env` 必须放在项目根目录（与 `app/` 同级）
+- 不要提交真实 `.env`（已在 `.gitignore`）
+- `db/` 放的是 Python 代码；数据库文件应在 `data/` 或外部挂载目录
+
