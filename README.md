@@ -130,3 +130,19 @@ app/
 - 不要提交真实 `.env`（已在 `.gitignore`）
 - `db/` 放的是 Python 代码；数据库文件应在 `data/` 或外部挂载目录
 
+---
+
+## 数据库查看脚本（简易）
+
+脚本：`scripts/customer_db_visualize.py`
+
+默认读取：
+- 项目根目录 `.env`
+- 数据库路径优先取 `SQLITE_PATH`，没有则回退到 `app/data/ai_customer_service.db`
+
+常用用法：
+- 用户列表：`python scripts/customer_db_visualize.py --limit 20`
+- 查看用户对话：`python scripts/customer_db_visualize.py --user "external_userid" --open-kfid "open_kfid"`
+- 昵称模糊检索：`python scripts/customer_db_visualize.py --nickname "张"`
+- 查看数据库结构：`python scripts/customer_db_visualize.py --schema`
+
