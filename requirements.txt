@@ -1,4 +1,5 @@
 flask
 openai
 pycryptodome
+prompt_toolkit>=3.0.0
 
