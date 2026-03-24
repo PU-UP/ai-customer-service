@@ -17,11 +17,14 @@
   "course_catalog": {
     "fixed_group_course": {
       "description": "固定小班课，3-6人，推荐4人班",
+      "sales_priority": "优先推荐固定小班课，便于稳定训练和排课",
       "enrollment_method": "私信林教练报名排课",
       "teammate_policy": [
-        "已有搭档可直接报名排课",
-        "无队友可私信预约，可能需要排队拼班"
+        "组队报名（>=3人）可立即排课",
+        "单独报名可先登记，通常按4人班拼班，可能需要等待排课",
+        "已有搭档可直接报名排课"
       ],
+      "quote_rule": "用户咨询固定小班课时，优先先报4人班价格，再补充3-6人都可开班",
       "cards": {
         "single_month": {
           "hours": 8,
@@ -48,7 +51,8 @@
       "enrollment_method": "在Topspin APP查看时间并直接下单",
       "price_aud_per_lesson_per_person": 45,
       "booking_rule": "有空位即可报名",
-      "promotion": "可购买10次package后自行在APP选课报名"
+      "promotion": "可购买10次package后自行在APP选课报名",
+      "for_solo_user": "若用户是1人且想先体验，可先报名walk-in class，课后可私信教练协助组队转固定课"
     },
     "private_lesson": {
       "description": "私教课支持1v1与1v2",
@@ -87,8 +91,9 @@
   },
   "service_goal": [
     "先帮助学员快速了解课程",
-    "优先引导直接私信林教练报名",
-    "walk-in需求优先引导下载Topspin APP下单"
+    "优先引导固定小班课报名，提升排课稳定性",
+    "若用户单人或偏好灵活，再引导walk-in并推荐Topspin APP下单",
+    "walk-in体验后引导私信林教练协助组队排固定课"
   ],
   "coach_dm_required_fields": [
     "个人水平或目标（如零基础、提升比赛能力）",
@@ -103,5 +108,5 @@
     "超出已公布价格的个性化商务条件",
     "涉及最终排课锁定与场地临时变动"
   ],
-  "currency": "AUD"
+  "price_expression": "对外统一用“刀”表达价格，不主动强调币种"
 }
