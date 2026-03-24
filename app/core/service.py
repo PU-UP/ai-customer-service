@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.config import REPLY_TRUNCATE_MAX_CHARS
 from app.core.llm import ask_llm_for_user
 from app.core.logging import log
 from app.core.policy import SENSITIVE_FALLBACK_TEXT, match_faq, match_sensitive_keyword
@@ -7,8 +8,10 @@ from app.core.utils import mask_id
 from app.db.sqlite_store import append_conversation_message
 
 
-def _truncate_reply(text: str, max_chars: int = 150) -> str:
+def _truncate_reply(text: str, max_chars: int = REPLY_TRUNCATE_MAX_CHARS) -> str:
     t = (text or "").strip()
+    if max_chars <= 0:
+        return t
     if len(t) <= max_chars:
         return t
     cut_region = t[:max_chars]

@@ -4,6 +4,7 @@ import traceback
 from typing import Any
 
 from app.channels.wecom import kf_send_text, kf_sync_msg
+from app.config import REPLY_TRUNCATE_MAX_CHARS
 from app.core.logging import log, log_separator
 from app.core.policy import (
     NON_TEXT_REPLY,
@@ -20,13 +21,15 @@ from app.db.sqlite_store import (
 )
 
 
-def truncate_reply(text: str, max_chars: int = 150) -> str:
+def truncate_reply(text: str, max_chars: int = REPLY_TRUNCATE_MAX_CHARS) -> str:
     """
     Light post-process:
     - If over max_chars, cut near punctuation within that region.
     """
 
     t = (text or "").strip()
+    if max_chars <= 0:
+        return t
     if len(t) <= max_chars:
         return t
     cut_region = t[:max_chars]
