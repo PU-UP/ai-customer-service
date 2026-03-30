@@ -45,9 +45,21 @@ def _pick_first_existing_path(candidates: list[str], default_to_first: bool = Tr
 SCENARIO = (os.getenv("SCENARIO", "") or "tennis_club").strip() or "tennis_club"
 CHANNEL_DRIVER = (os.getenv("CHANNEL_DRIVER", "") or "wecom_webhook").strip() or "wecom_webhook"
 
+# Prefer local (gitignored) scenarios; fall back to repo examples.
+SCENARIOS_LOCAL_DIR = os.getenv("SCENARIOS_LOCAL_DIR", "").strip() or os.path.join(PROJECT_ROOT, "app", "scenarios_local")
+SCENARIOS_REPO_DIR = os.path.join(PROJECT_ROOT, "app", "scenarios")
+
+
+def _scenario_candidates(filename: str) -> list[str]:
+    return [
+        os.path.join(SCENARIOS_LOCAL_DIR, SCENARIO, filename),
+        os.path.join(SCENARIOS_REPO_DIR, SCENARIO, filename),
+    ]
+
 
 def _scenario_path(filename: str) -> str:
-    return os.path.join(PROJECT_ROOT, "app", "scenarios", SCENARIO, filename)
+    # Keep old helper name for readability; now it returns the first existing path.
+    return _pick_first_existing_path(_scenario_candidates(filename))
 
 
 TOKEN = os.getenv("TOKEN", "")
@@ -95,7 +107,7 @@ SQLITE_PATH = (
 
 _club_profile_default = _pick_first_existing_path(
     [
-        _scenario_path("club_profile.json"),
+        *_scenario_candidates("club_profile.json"),
         os.path.join(PROJECT_ROOT, "app", "club_profile.json"),
         os.path.join(PROJECT_ROOT, "club_profile.json"),
     ]
@@ -104,7 +116,7 @@ CLUB_PROFILE_PATH = os.getenv("CLUB_PROFILE_PATH", "").strip() or _club_profile_
 
 _faq_default = _pick_first_existing_path(
     [
-        _scenario_path("faq.json"),
+        *_scenario_candidates("faq.json"),
         os.path.join(PROJECT_ROOT, "app", "faq.json"),
         os.path.join(PROJECT_ROOT, "faq.json"),
     ]
@@ -113,7 +125,7 @@ FAQ_PATH = os.getenv("FAQ_PATH", "").strip() or _faq_default
 
 SYSTEM_PROMPT_PATH = os.getenv("SYSTEM_PROMPT_PATH", "").strip() or _pick_first_existing_path(
     [
-        _scenario_path("system_prompt.txt"),
+        *_scenario_candidates("system_prompt.txt"),
         os.path.join(PROJECT_ROOT, "system_prompts.txt"),
         os.path.join(PROJECT_ROOT, "prompts", "system_prompt.txt"),
     ]

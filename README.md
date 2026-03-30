@@ -73,7 +73,7 @@ SCENARIO=tennis_club
 
 ## 3. 场景切换用法（核心）
 
-默认场景目录结构：
+默认场景目录结构（示例资产，随仓库提交）：
 
 ```text
 app/scenarios/<SCENARIO>/
@@ -82,17 +82,25 @@ app/scenarios/<SCENARIO>/
 └─ faq.json
 ```
 
-例如当前：
+例如当前示例：
 
 ```text
 app/scenarios/tennis_club/
 ```
 
-你要切换到另一个业务（比如足球俱乐部）时：
-1. 新建 `app/scenarios/football_club/`
-2. 放入这 3 个文件
-3. 将 `.env` 改为 `SCENARIO=football_club`
-4. 重启服务
+但实际使用时，程序会**优先读取本地场景目录**（默认加入 `.gitignore`，用于放你的私有/可变内容）：
+
+```text
+app/scenarios_local/<SCENARIO>/
+├─ system_prompt.txt
+├─ club_profile.json
+└─ faq.json
+```
+
+你要切换到另一个业务（比如足球俱乐部）时，推荐流程：
+1. 从示例复制一份到本地目录：`app/scenarios/tennis_club/` -> `app/scenarios_local/football_club/`（或直接新建并放入这 3 个文件）
+2. 将 `.env` 改为 `SCENARIO=football_club`
+3. 重启服务
 
 不需要改 `core` 代码。
 
@@ -104,6 +112,7 @@ app/scenarios/tennis_club/
   - `wecom_webhook`：企业微信
   - `terminal_cli`：终端交互
 - `SCENARIO`：场景名称（决定默认资产目录）
+- `SCENARIOS_LOCAL_DIR`：可选，本地场景根目录（默认 `app/scenarios_local/`）
 - `SYSTEM_PROMPT_PATH`：可选，手动覆盖 prompt 路径
 - `CLUB_PROFILE_PATH`：可选，手动覆盖 profile 路径
 - `FAQ_PATH`：可选，手动覆盖 FAQ 路径
@@ -119,7 +128,8 @@ app/
 ├─ core/       # 智能客服核心
 ├─ db/         # 数据访问层代码（不是数据库文件）
 ├─ data/       # 运行时数据文件目录（db 文件在这里）
-└─ scenarios/  # 场景资产目录
+├─ scenarios/        # 场景示例资产目录（随仓库提交）
+└─ scenarios_local/  # 本地场景资产目录（默认忽略，优先读取）
 ```
 
 ---
