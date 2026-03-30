@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 客服管理后台</title>
+    <link rel="stylesheet" href="/admin/ui/admin.css" />
+  </head>
+  <body class="bg">
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brandMark">CS</div>
+          <div>
+            <div class="brandTitle">AI 客服管理后台</div>
+            <div class="brandSub">编辑当前 SCENARIO 的资产：Club Profile / FAQ / System Prompt</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="pill">SCENARIO：<strong id="scenarioName">-</strong></div>
+          <button class="btnGhost" id="btnReload" type="button">重新加载</button>
+          <form method="post" action="/admin/logout">
+            <button class="btnGhost" type="submit">退出</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel" id="leftPanel">
+          <div class="tabs" role="tablist" aria-label="Assets Tabs">
+            <button class="tab" id="tabProfile" role="tab" aria-selected="true" data-tab="profile">Club Profile</button>
+            <button class="tab" id="tabFaq" role="tab" aria-selected="false" data-tab="faq">FAQ</button>
+            <button class="tab" id="tabPrompt" role="tab" aria-selected="false" data-tab="prompt">System Prompt</button>
+          </div>
+
+          <div class="content">
+            <!-- Club Profile -->
+            <div class="stack" data-pane="profile">
+              <p class="sectionTitle">常用字段（表单）</p>
+              <div class="row">
+                <div class="field">
+                  <label class="label" for="cp_club_name">俱乐部名称</label>
+                  <input class="input" id="cp_club_name" placeholder="club_name" />
+                </div>
+                <div class="field">
+                  <label class="label" for="cp_city">城市</label>
+                  <input class="input" id="cp_city" placeholder="city" />
+                </div>
+              </div>
+              <div class="field">
+                <label class="label" for="cp_venues">场地（每行一个）</label>
+                <textarea class="textarea" id="cp_venues" style="min-height:110px" placeholder="venues[]"></textarea>
+              </div>
+              <div class="field">
+                <label class="label" for="cp_targets">适合人群（每行一个）</label>
+                <textarea class="textarea" id="cp_targets" style="min-height:110px" placeholder="target_students[]"></textarea>
+              </div>
+
+              <div class="inline">
+                <button class="btnPrimary" id="btnSaveProfile" type="button">保存 Club Profile</button>
+                <button class="btnGhost" id="btnToggleProfileJson" type="button">高级：JSON 视图</button>
+                <span class="muted small" id="cpPath">-</span>
+              </div>
+
+              <div class="field" id="cpJsonWrap" style="display:none">
+                <label class="label" for="cp_json">Club Profile JSON（高级模式）</label>
+                <textarea class="textarea" id="cp_json" spellcheck="false"></textarea>
+                <div class="muted small" style="margin-top:6px">
+                  提示：此处 JSON 必须合法；保存前会做校验。你可以继续用表单编辑常用字段，二者会同步。
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="stack" data-pane="faq" style="display:none">
+              <div class="inline" style="justify-content:space-between">
+                <p class="sectionTitle" style="margin:0">FAQ 列表（可视化编辑）</p>
+                <button class="btnGhost" id="btnAddFaq" type="button">新增一条</button>
+              </div>
+              <div class="field">
+                <label class="label" for="faqSearch">搜索（关键词/答案）</label>
+                <input class="input" id="faqSearch" placeholder="输入以过滤…" />
+              </div>
+              <div class="stack" id="faqList"></div>
+              <div class="inline">
+                <button class="btnPrimary" id="btnSaveFaq" type="button">保存 FAQ</button>
+                <span class="muted small" id="faqPath">-</span>
+              </div>
+            </div>
+
+            <!-- Prompt -->
+            <div class="stack" data-pane="prompt" style="display:none">
+              <p class="sectionTitle">System Prompt（文本）</p>
+              <div class="field">
+                <label class="label" for="promptText">支持占位符：<code>{{club_profile}}</code></label>
+                <textarea class="textarea" id="promptText" spellcheck="false" style="min-height:420px"></textarea>
+              </div>
+              <div class="inline">
+                <button class="btnPrimary" id="btnSavePrompt" type="button">保存 System Prompt</button>
+                <span class="muted small" id="promptPath">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="content">
+            <p class="sectionTitle">状态与校验</p>
+            <div class="field">
+              <div class="label">当前读取路径</div>
+              <div class="stack">
+                <div class="muted small">Club Profile：<span class="mono" id="pathClub">-</span></div>
+                <div class="muted small">FAQ：<span class="mono" id="pathFaq">-</span></div>
+                <div class="muted small">Prompt：<span class="mono" id="pathPrompt">-</span></div>
+              </div>
+              <div class="divider"></div>
+              <div class="muted small">
+                保存时会写入：<code>app/scenarios_local/&lt;SCENARIO&gt;/</code> 并触发热加载。
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="label">FAQ 结构要求</div>
+              <div class="muted small">
+                每条必须包含：<code>keywords: string[]</code>（非空）与 <code>answer: string</code>（非空）。
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="label">高级提示</div>
+              <div class="muted small">
+                - Club Profile 的“高级 JSON 视图”适合编辑复杂嵌套字段（比如课程表）。<br />
+                - 如保存后 webhook/worker 仍使用旧配置，请检查右侧路径是否指向期望文件。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast">
+        <div class="toastTitle" id="toastTitle">-</div>
+        <div class="toastMsg" id="toastMsg">-</div>
+      </div>
+    </div>
+
+    <script src="/admin/ui/admin.js"></script>
+  </body>
+</html>
+

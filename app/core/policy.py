@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import json
+import threading
 import traceback
 from typing import Any
 
@@ -11,6 +12,7 @@ from app.core.logging import log
 _CLUB_PROFILE: dict[str, Any] = {}
 _FAQ_ITEMS: list[dict[str, Any]] = []
 _SYSTEM_PROMPT_PATH: str = SYSTEM_PROMPT_PATH
+_ASSET_LOCK = threading.RLock()
 
 FALLBACK_TEXT = "已收到你的消息，我先帮你记录，稍后由老师进一步为你确认。"
 
@@ -74,14 +76,16 @@ def load_prompt_template(path: str) -> str:
 def build_system_prompt(profile: dict[str, Any]) -> str:
     template = ""
     try:
-        if _SYSTEM_PROMPT_PATH and os.path.exists(_SYSTEM_PROMPT_PATH):
-            template = load_prompt_template(_SYSTEM_PROMPT_PATH)
+        with _ASSET_LOCK:
+            prompt_path = _SYSTEM_PROMPT_PATH
+        if prompt_path and os.path.exists(prompt_path):
+            template = load_prompt_template(prompt_path)
         else:
             # Low-risk compatibility: avoid crashing when template is missing.
-            log("prompt.template_missing_fallback", {"path": _SYSTEM_PROMPT_PATH}, debug_only=True)
+            log("prompt.template_missing_fallback", {"path": prompt_path}, debug_only=True)
             template = "{{club_profile}}"
     except Exception:
-        log("prompt.template_read_failed_fallback", {"path": _SYSTEM_PROMPT_PATH})
+        log("prompt.template_read_failed_fallback", {"path": prompt_path if "prompt_path" in locals() else _SYSTEM_PROMPT_PATH})
         log("prompt.template_read_failed_fallback.trace", {"trace": traceback.format_exc()}, debug_only=True)
         template = "{{club_profile}}"
 
@@ -112,9 +116,12 @@ def match_faq(user_text: str) -> dict[str, Any] | None:
     if not t:
         return None
 
+    with _ASSET_LOCK:
+        faq_items = list(_FAQ_ITEMS)
+
     best: dict[str, Any] | None = None
     best_len = -1
-    for item in _FAQ_ITEMS:
+    for item in faq_items:
         keywords = item.get("keywords") or []
         if not isinstance(keywords, list):
             continue
@@ -134,16 +141,28 @@ def match_faq(user_text: str) -> dict[str, Any] | None:
 
 def load_assets(club_profile_path: str, faq_path: str, system_prompt_path: str | None = None) -> None:
     global _CLUB_PROFILE, _FAQ_ITEMS, _SYSTEM_PROMPT_PATH
-    _CLUB_PROFILE = load_club_profile(club_profile_path)
-    _FAQ_ITEMS = load_faq(faq_path)
-    if system_prompt_path:
-        _SYSTEM_PROMPT_PATH = system_prompt_path
+    cp = load_club_profile(club_profile_path)
+    faq = load_faq(faq_path)
+    with _ASSET_LOCK:
+        _CLUB_PROFILE = cp
+        _FAQ_ITEMS = faq
+        if system_prompt_path:
+            _SYSTEM_PROMPT_PATH = system_prompt_path
+
+
+def reload_assets() -> None:
+    # Import lazily to avoid circular imports on module load.
+    from app.config import CLUB_PROFILE_PATH, FAQ_PATH, SYSTEM_PROMPT_PATH
+
+    load_assets(club_profile_path=CLUB_PROFILE_PATH, faq_path=FAQ_PATH, system_prompt_path=SYSTEM_PROMPT_PATH)
 
 
 def get_club_profile() -> dict[str, Any]:
-    return _CLUB_PROFILE
+    with _ASSET_LOCK:
+        return dict(_CLUB_PROFILE)
 
 
 def get_faq_items() -> list[dict[str, Any]]:
-    return _FAQ_ITEMS
+    with _ASSET_LOCK:
+        return list(_FAQ_ITEMS)
 

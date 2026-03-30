@@ -107,5 +107,12 @@ def wechat_callback():
 
 def create_app() -> Flask:
     # Placeholder for future expansion (local debug / multiple channels).
+    try:
+        from app.web.routes import bp as admin_bp
+
+        app.register_blueprint(admin_bp)
+    except Exception as e:
+        # Admin UI is optional; avoid breaking webhook if missing deps/files.
+        log("admin.blueprint.register_failed", {"err": repr(e)}, debug_only=True)
     return app
 

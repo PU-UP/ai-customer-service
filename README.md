@@ -142,6 +142,31 @@ app/
 
 ---
 
+## 7. 管理后台（网页）使用说明
+
+该项目内置一个简单的管理后台，用于在网页里编辑当前 `SCENARIO` 的 3 份资产：
+- `club_profile.json`
+- `faq.json`
+- `system_prompt.txt`
+
+### 开启与访问
+
+1) 在 `.env` 中设置管理员口令（必填）：
+
+```env
+ADMIN_TOKEN=your_admin_token
+```
+
+2) 启动服务（需要 `CHANNEL_DRIVER=wecom_webhook`，因为后台挂在 Flask 服务上）后访问：
+- `GET /admin`（未登录会跳转到 `/admin/login`）
+
+### 保存写到哪里
+
+- 后台保存时会**写入本地覆盖目录**：`app/scenarios_local/<SCENARIO>/`（默认已加入 `.gitignore`）
+- 写入后会触发**热加载**，进程会立刻使用新配置（无需重启）
+
+---
+
 ## 数据库查看脚本（简易）
 
 脚本：`scripts/customer_db_visualize.py`

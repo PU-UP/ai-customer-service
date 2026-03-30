@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 客服后台登录</title>
+    <link rel="stylesheet" href="/admin/ui/admin.css" />
+  </head>
+  <body class="bg">
+    <div class="shell">
+      <div class="loginCard">
+        <div class="brand">
+          <div class="brandMark">CS</div>
+          <div>
+            <div class="brandTitle">AI 客服管理后台</div>
+            <div class="brandSub">请输入管理员口令（ADMIN_TOKEN）</div>
+          </div>
+        </div>
+
+        <form class="form" method="post" action="/admin/login">
+          <label class="label" for="token">管理员口令</label>
+          <input class="input" id="token" name="token" type="password" autocomplete="current-password" placeholder="ADMIN_TOKEN" />
+          <button class="btnPrimary" type="submit">登录</button>
+        </form>
+
+        <div class="hint">
+          提示：口令来自服务端环境变量 <code>ADMIN_TOKEN</code>，不会写入前端代码与仓库。
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
