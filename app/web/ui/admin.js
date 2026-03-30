@@ -15,6 +15,11 @@ function toast(kind, title, msg) {
 
 async function apiGet(url) {
   const r = await fetch(url, { credentials: "same-origin" });
+  if (r.status === 401) {
+    // Not logged in (or cookie missing/expired). Send user to login first.
+    window.location.href = "/admin/login";
+    throw new Error("401 Unauthorized");
+  }
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
   return await r.json();
 }
@@ -26,6 +31,10 @@ async function apiPutJson(url, body) {
     body: JSON.stringify(body),
     credentials: "same-origin",
   });
+  if (r.status === 401) {
+    window.location.href = "/admin/login";
+    throw new Error("401 Unauthorized");
+  }
   const txt = await r.text();
   if (!r.ok) throw new Error(`${r.status} ${txt}`);
   return txt ? JSON.parse(txt) : {};

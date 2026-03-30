@@ -49,10 +49,28 @@ CHANNEL_DRIVER = (os.getenv("CHANNEL_DRIVER", "") or "wecom_webhook").strip() or
 SCENARIOS_LOCAL_DIR = os.getenv("SCENARIOS_LOCAL_DIR", "").strip() or os.path.join(PROJECT_ROOT, "app", "scenarios_local")
 SCENARIOS_REPO_DIR = os.path.join(PROJECT_ROOT, "app", "scenarios")
 
+def _is_flat_scenarios_dir(base_dir: str) -> bool:
+    """
+    Treat SCENARIOS_LOCAL_DIR as a "flat" assets directory when it directly contains
+    the three asset files (no <SCENARIO>/ subdirectory layout).
+    """
+    if not base_dir:
+        return False
+    return any(
+        os.path.exists(os.path.join(base_dir, fn))
+        for fn in ("club_profile.json", "faq.json", "system_prompt.txt")
+    )
+
 
 def _scenario_candidates(filename: str) -> list[str]:
+    # If the local dir is "flat", prefer <SCENARIOS_LOCAL_DIR>/<filename>.
+    local_first = (
+        [os.path.join(SCENARIOS_LOCAL_DIR, filename)]
+        if _is_flat_scenarios_dir(SCENARIOS_LOCAL_DIR)
+        else [os.path.join(SCENARIOS_LOCAL_DIR, SCENARIO, filename)]
+    )
     return [
-        os.path.join(SCENARIOS_LOCAL_DIR, SCENARIO, filename),
+        *local_first,
         os.path.join(SCENARIOS_REPO_DIR, SCENARIO, filename),
     ]
 
@@ -130,6 +148,18 @@ SYSTEM_PROMPT_PATH = os.getenv("SYSTEM_PROMPT_PATH", "").strip() or _pick_first_
         os.path.join(PROJECT_ROOT, "prompts", "system_prompt.txt"),
     ]
 )
+
+
+def scenarios_local_write_dir() -> str:
+    """
+    Where admin UI writes assets:
+    - If SCENARIOS_LOCAL_DIR is flat (contains asset files directly), write into it.
+    - Otherwise, write into SCENARIOS_LOCAL_DIR/<SCENARIO>/.
+    """
+    base = (SCENARIOS_LOCAL_DIR or "").strip()
+    if _is_flat_scenarios_dir(base):
+        return base
+    return os.path.join(base, SCENARIO)
 
 WORKER_COUNT = int(os.getenv("WORKER_COUNT", "1") or "1")
 if WORKER_COUNT <= 0:

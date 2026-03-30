@@ -7,7 +7,7 @@ from typing import Any
 
 from flask import Blueprint, Response, abort, make_response, redirect, request, send_from_directory, url_for
 
-from app.config import CLUB_PROFILE_PATH, FAQ_PATH, SCENARIO, SCENARIOS_LOCAL_DIR, SYSTEM_PROMPT_PATH
+from app.config import CLUB_PROFILE_PATH, FAQ_PATH, SCENARIO, scenarios_local_write_dir, SYSTEM_PROMPT_PATH
 from app.core.logging import log
 from app.core.policy import reload_assets
 
@@ -65,8 +65,7 @@ def _read_json(path: str) -> Any:
 
 
 def _ensure_scenarios_local_dir() -> str:
-    base = (SCENARIOS_LOCAL_DIR or "").strip()
-    target = os.path.join(base, SCENARIO)
+    target = scenarios_local_write_dir()
     os.makedirs(target, exist_ok=True)
     return target
 

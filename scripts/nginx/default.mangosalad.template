@@ -1,0 +1,55 @@
+##
+# Managed Nginx site template for AI Customer Service admin UI.
+#
+# Variables to replace in the installer script:
+# - __SERVER_NAME__
+# - __WEB_ROOT__
+# - __ADMIN_UI_ALIAS_DIR__
+# - __UPSTREAM__
+##
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name __SERVER_NAME__;
+
+    root __WEB_ROOT__;
+    index index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Admin UI static files (served by nginx)
+    location = /admin/ui {
+        return 301 /admin/ui/;
+    }
+    location ^~ /admin/ui/ {
+        alias __ADMIN_UI_ALIAS_DIR__/;
+        index index.html;
+    }
+
+    # /admin goes to UI (login handled by backend)
+    location = /admin {
+        return 301 /admin/ui/;
+    }
+    location = /admin/ {
+        return 301 /admin/ui/;
+    }
+
+    # /admin API + auth handled by backend
+    location ^~ /admin/ {
+        proxy_pass __UPSTREAM__;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Keep existing wechat reverse proxy
+    location /wechat {
+        proxy_pass __UPSTREAM__;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
