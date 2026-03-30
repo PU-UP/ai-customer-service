@@ -1,112 +1,111 @@
 {
-  "club_name": "致旋网球俱乐部",
-  "city": "Sydney",
+  "meta": {
+    "schema_version": 2,
+    "scenario": "tennis_club"
+  },
+  "basics": {
+    "name": "致旋网球俱乐部",
+    "city": "Sydney"
+  },
   "venues": [
     "Abuklea Road Tennis Maquarie Park",
     "Sydney Boys High School Moore Park"
   ],
-  "target_students": [
-    "零基础想开始学网球",
-    "有基础想进阶提升",
-    "想组队学球的学员"
-  ],
-  "youth_program": {
-    "status": "筹备中",
-    "note": "目前有青少年训练计划，但暂未正式开班"
+  "audience": {
+    "targets": [
+      "零基础想开始学网球",
+      "有基础想进阶提升",
+      "想组队学球的学员"
+    ],
+    "youth_program": {
+      "status": "筹备中",
+      "note": "目前有青少年训练计划，但暂未正式开班"
+    }
   },
-  "course_catalog": {
-    "fixed_group_course": {
-      "description": "固定小班课，3-6人，推荐4人班",
-      "sales_priority": "优先推荐固定小班课，便于稳定训练和排课",
-      "enrollment_method": "私信林教练报名排课",
-      "teammate_policy": [
-        "组队报名（>=3人）可立即排课",
-        "单独报名可先登记，通常按4人班拼班，可能需要等待排课",
-        "已有搭档可直接报名排课"
+  "courses": [
+    {
+      "id": "fixed_group",
+      "name": "固定小班课",
+      "summary": "3-6 人，推荐 4 人班",
+      "booking": "私信林教练报名排课",
+      "notes": [
+        "组队报名（>=3 人）可立即排课",
+        "单独报名可先登记，通常按 4 人班拼班，可能需要等待排课"
       ],
-      "quote_rule": "用户咨询固定小班课时，优先先报4人班价格，再补充3-6人都可开班",
-      "cards": {
-        "single_month": {
+      "cards": [
+        {
+          "name": "单月卡",
           "hours": 8,
           "price_aud_per_person": {
-            "3_people": 400,
-            "4_people": 340,
-            "5_people": 280,
-            "6_people": 240
+            "3": 400,
+            "4": 340,
+            "5": 280,
+            "6": 240
           }
         },
-        "double_month": {
+        {
+          "name": "双月卡",
           "hours": 16,
           "price_aud_per_person": {
-            "3_people": 750,
-            "4_people": 640,
-            "5_people": 560,
-            "6_people": 480
+            "3": 750,
+            "4": 640,
+            "5": 560,
+            "6": 480
           }
         }
-      }
+      ]
     },
-    "walk_in_class": {
-      "description": "灵活walk-in class，通常4人班",
-      "enrollment_method": "在Topspin APP查看时间并直接下单",
+    {
+      "id": "walk_in",
+      "name": "Walk-in class",
+      "summary": "灵活约课，通常 4 人班",
+      "booking": "Topspin APP 查看时间并下单",
       "price_aud_per_lesson_per_person": 45,
-      "booking_rule": "有空位即可报名",
-      "promotion": "可购买10次package后自行在APP选课报名",
-      "for_solo_user": "若用户是1人且想先体验，可先报名walk-in class，课后可私信教练协助组队转固定课"
+      "notes": [
+        "有空位即可报名",
+        "可购买 10 次 package 后在 APP 自行选课",
+        "1 人想先体验可先上 walk-in；课后可私信教练协助组队转固定小班课"
+      ]
     },
-    "private_lesson": {
-      "description": "私教课支持1v1与1v2",
-      "fixed_weekly_time": {
-        "one_on_one": {
-          "10_hours_package_aud": 1250,
-          "20_hours_package_aud": 2400
+    {
+      "id": "private",
+      "name": "私教课",
+      "summary": "支持 1v1 / 1v2",
+      "booking": "私信林教练报名排课",
+      "packages_aud": {
+        "fixed_weekly_time": {
+          "one_on_one": {
+            "10_hours": 1250,
+            "20_hours": 2400
+          },
+          "one_on_two_total": {
+            "10_hours": 1400,
+            "20_hours": 2700
+          }
         },
-        "one_on_two_total_price": {
-          "10_hours_package_aud": 1400,
-          "20_hours_package_aud": 2700
-        }
-      },
-      "flexible_time_policy": "不固定时间在固定时间价格基础上加10%",
-      "flexible_time_prices_aud": {
-        "one_on_one": {
-          "10_hours_package_aud": 1375,
-          "20_hours_package_aud": 2640
-        },
-        "one_on_two_total_price": {
-          "10_hours_package_aud": 1540,
-          "20_hours_package_aud": 2970
+        "flexible_time": {
+          "markup_percent": 10,
+          "one_on_one": {
+            "10_hours": 1375,
+            "20_hours": 2640
+          },
+          "one_on_two_total": {
+            "10_hours": 1540,
+            "20_hours": 2970
+          }
         }
       }
     }
-  },
-  "trial_lesson_policy": {
-    "available": true,
-    "how_to_book": "如学员主动询问试课，可私信林教练咨询试课安排",
-    "proactive_recommendation": "不主动推荐试课，仅在用户问到时说明"
-  },
-  "coach_policy": {
-    "head_coach": "林教练是俱乐部Head Coach",
-    "assignment_rule": "实际课程会根据学员情况匹配合适教练",
-    "switch_rule": "若对当前教练不满意，可随时申请更换教练"
-  },
-  "service_goal": [
-    "先帮助学员快速了解课程",
-    "优先引导固定小班课报名，提升排课稳定性",
-    "若用户单人或偏好灵活，再引导walk-in并推荐Topspin APP下单",
-    "walk-in体验后引导私信林教练协助组队排固定课"
   ],
-  "coach_dm_required_fields": [
-    "个人水平或目标（如零基础、提升比赛能力）",
-    "想报名课程类型（私教/团体课/walk-in）",
-    "是否有人一起报名（>=3人可立即开课）",
-    "选择单月卡（8课时）或双月卡（16课时）",
-    "每周可上课时间（周几+几点）",
-    "偏好上课地点（两个场地二选一）"
-  ],
-  "human_confirmation_boundary": [
-    "退款、投诉、合同、发票、法律承诺",
-    "超出已公布价格的个性化商务条件",
-    "涉及最终排课锁定与场地临时变动"
-  ],
-  "price_expression": "对外统一用“刀”表达价格，不主动强调币种"
+  "policies": {
+    "trial_lesson": {
+      "available": true,
+      "how_to_book": "如学员主动询问试课，可私信林教练咨询试课安排"
+    },
+    "coach_assignment": {
+      "head_coach": "林教练是俱乐部 Head Coach",
+      "assignment_rule": "实际课程会根据学员情况匹配合适教练",
+      "switch_rule": "若对当前教练不满意，可随时申请更换教练"
+    }
+  }
 }
