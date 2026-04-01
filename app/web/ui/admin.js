@@ -158,9 +158,12 @@ function renderFaq(list, filterText) {
     l.textContent = "答案";
     const ta = document.createElement("textarea");
     ta.className = "textarea";
-    ta.style.minHeight = "140px";
+    ta.style.minHeight = "72px";
     ta.value = it.answer || "";
     ta.oninput = () => (it.answer = ta.value);
+    ta.dataset.autogrow = "1";
+    ta.dataset.minH = "72";
+    ta.dataset.maxH = "520";
     ansField.appendChild(l);
     ansField.appendChild(ta);
 
@@ -259,9 +262,60 @@ function textAreaField(label, value, placeholder, minHeightPx) {
   ta.value = value ?? "";
   if (placeholder) ta.placeholder = placeholder;
   if (minHeightPx) ta.style.minHeight = `${minHeightPx}px`;
+  ta.dataset.autogrow = "1";
+  if (minHeightPx) ta.dataset.minH = String(minHeightPx);
   wrap.appendChild(l);
   wrap.appendChild(ta);
   return { wrap, textarea: ta };
+}
+
+function autoGrowTextarea(ta, minHeightPx, maxHeightPx) {
+  if (!ta) return;
+  const minH = typeof minHeightPx === "number" && Number.isFinite(minHeightPx) ? minHeightPx : 0;
+  const maxH = typeof maxHeightPx === "number" && Number.isFinite(maxHeightPx) ? maxHeightPx : Infinity;
+  ta.style.height = "auto";
+  const next = Math.max(minH, Math.min(ta.scrollHeight, maxH));
+  ta.style.height = `${next}px`;
+  ta.style.overflowY = ta.scrollHeight > next ? "auto" : "hidden";
+}
+
+function wireAutoGrowTextarea(ta, minHeightPx, maxHeightPx) {
+  if (!ta) return;
+  const handler = () => autoGrowTextarea(ta, minHeightPx, maxHeightPx);
+  ta.addEventListener("input", handler);
+  // Initial sizing after DOM attach.
+  setTimeout(handler, 0);
+}
+
+function _parseNumAttr(el, key) {
+  const raw = el?.dataset ? el.dataset[key] : undefined;
+  if (raw === undefined || raw === null || raw === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+function wireAutoGrowTextareaFromDataset(ta) {
+  if (!ta || ta.tagName !== "TEXTAREA") return;
+  if (ta.dataset._autogrowWired === "1") return;
+  if (ta.dataset.autogrow !== "1") return;
+  const minH = _parseNumAttr(ta, "minH");
+  const maxH = _parseNumAttr(ta, "maxH");
+  ta.dataset._autogrowWired = "1";
+  wireAutoGrowTextarea(ta, minH ?? 0, maxH ?? Infinity);
+}
+
+function initGlobalAutoGrow() {
+  document.querySelectorAll('textarea[data-autogrow="1"]').forEach((ta) => wireAutoGrowTextareaFromDataset(ta));
+  const obs = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      for (const n of m.addedNodes || []) {
+        if (!n || n.nodeType !== 1) continue;
+        if (n.tagName === "TEXTAREA") wireAutoGrowTextareaFromDataset(n);
+        n.querySelectorAll?.('textarea[data-autogrow="1"]').forEach((ta) => wireAutoGrowTextareaFromDataset(ta));
+      }
+    }
+  });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
 }
 
 function checkboxField(label, checked) {
@@ -303,32 +357,34 @@ function syncEditorState(nextCp) {
   if ($("cpJsonWrap").style.display !== "none") {
     $("cp_json").value = prettyJson(state.clubProfile);
   }
-  // Keep the top simple form in sync too (so either place can edit).
-  syncProfileFormFromJson(state.clubProfile);
+  const prev = $("cpPreview");
+  if (prev) renderProfilePreview(prev, state.clubProfile);
 }
 
 function renderProfilePreview(rootEl, rawCp) {
-  rootEl.innerHTML = "";
-  const cp = toV2ForDisplay(rawCp);
+  try {
+    rootEl.innerHTML = "";
+    const cp = toV2ForDisplay(rawCp);
 
-  const secBasic = el("div", "cpSection");
-  secBasic.appendChild(el("div", "cpSectionTitle", "基本信息"));
-  {
-    const row = el("div", "cpFormRow");
-    const f1 = inputField("俱乐部名称", cp.basics.name || "", "例如：致旋网球俱乐部");
-    const f2 = inputField("城市", cp.basics.city || "", "例如：Sydney");
-    row.appendChild(f1.wrap);
-    row.appendChild(f2.wrap);
-    f1.input.oninput = () => syncEditorState({ ...cp, basics: { ...(cp.basics || {}), name: f1.input.value || "" } });
-    f2.input.oninput = () => syncEditorState({ ...cp, basics: { ...(cp.basics || {}), city: f2.input.value || "" } });
-    secBasic.appendChild(row);
-  }
-  rootEl.appendChild(secBasic);
+    const secBasic = el("div", "cpSection");
+    secBasic.appendChild(el("div", "cpSectionTitle", "基本信息"));
+    {
+      const row = el("div", "cpFormRow");
+      const f1 = inputField("俱乐部名称", cp.basics.name || "", "例如：致旋网球俱乐部");
+      const f2 = inputField("城市", cp.basics.city || "", "例如：Sydney");
+      row.appendChild(f1.wrap);
+      row.appendChild(f2.wrap);
+      f1.input.oninput = () => syncEditorState({ ...cp, basics: { ...(cp.basics || {}), name: f1.input.value || "" } });
+      f2.input.oninput = () => syncEditorState({ ...cp, basics: { ...(cp.basics || {}), city: f2.input.value || "" } });
+      secBasic.appendChild(row);
+    }
+    rootEl.appendChild(secBasic);
 
   const secVen = el("div", "cpSection");
   secVen.appendChild(el("div", "cpSectionTitle", "场地"));
   {
-    const f = textAreaField("场地（每行一个）", toLines(cp.venues).join("\n"), "每行一个场地", 110);
+    const f = textAreaField("场地（每行一个）", toLines(cp.venues).join("\n"), "每行一个场地", 72);
+    wireAutoGrowTextarea(f.textarea, 72, 260);
     f.textarea.oninput = () => syncEditorState({ ...cp, venues: normalizeLines(f.textarea.value) });
     secVen.appendChild(f.wrap);
   }
@@ -337,7 +393,8 @@ function renderProfilePreview(rootEl, rawCp) {
   const secAud = el("div", "cpSection");
   secAud.appendChild(el("div", "cpSectionTitle", "适合人群 / 项目"));
   {
-    const f = textAreaField("适合人群（每行一个）", toLines(cp.audience.targets).join("\n"), "每行一个", 110);
+    const f = textAreaField("适合人群（每行一个）", toLines(cp.audience.targets).join("\n"), "每行一个", 72);
+    wireAutoGrowTextarea(f.textarea, 72, 320);
     f.textarea.oninput = () =>
       syncEditorState({ ...cp, audience: { ...(cp.audience || {}), targets: normalizeLines(f.textarea.value) } });
     secAud.appendChild(f.wrap);
@@ -346,7 +403,8 @@ function renderProfilePreview(rootEl, rawCp) {
     const row = el("div", "cpFormRow");
     const yp = cp.audience.youth_program || {};
     const s1 = inputField("青少年状态", String(yp.status || ""), "例如：筹备中");
-    const s2 = inputField("青少年备注", String(yp.note || ""), "例如：暂未正式开班");
+    const s2 = textAreaField("青少年备注", String(yp.note || ""), "例如：暂未正式开班", 54);
+    wireAutoGrowTextarea(s2.textarea, 54, 180);
     row.appendChild(s1.wrap);
     row.appendChild(s2.wrap);
     const apply = () =>
@@ -354,11 +412,11 @@ function renderProfilePreview(rootEl, rawCp) {
         ...cp,
         audience: {
           ...(cp.audience || {}),
-          youth_program: { status: s1.input.value || "", note: s2.input.value || "" },
+          youth_program: { status: s1.input.value || "", note: s2.textarea.value || "" },
         },
       });
     s1.input.oninput = apply;
-    s2.input.oninput = apply;
+    s2.textarea.oninput = apply;
     secAud.appendChild(row);
   }
   rootEl.appendChild(secAud);
@@ -528,7 +586,8 @@ function renderProfilePreview(rootEl, rawCp) {
 
     const notes = toLines(c.notes);
     {
-      const f = textAreaField("备注（每行一条，可空）", notes.join("\n"), "每行一条", 90);
+      const f = textAreaField("备注（每行一条，可空）", notes.join("\n"), "每行一条", 54);
+      wireAutoGrowTextarea(f.textarea, 54, 240);
       f.textarea.oninput = () => {
         const nextCourse = { ...c, notes: normalizeLines(f.textarea.value) };
         syncEditorState({ ...cp, courses: cp.courses.map((x) => (x.id === c.id ? nextCourse : x)) });
@@ -557,7 +616,8 @@ function renderProfilePreview(rootEl, rawCp) {
     };
     secPol.appendChild(cb.wrap);
 
-    const how = textAreaField("试课预约说明", tr.how_to_book || "", "例如：用户主动问试课时，私信林教练咨询安排", 90);
+    const how = textAreaField("试课预约说明", tr.how_to_book || "", "例如：用户主动问试课时，私信林教练咨询安排", 54);
+    wireAutoGrowTextarea(how.textarea, 54, 220);
     how.textarea.oninput = () => {
       const next = {
         ...cp,
@@ -594,7 +654,13 @@ function renderProfilePreview(rootEl, rawCp) {
     s.input.oninput = apply;
     secPol.appendChild(row);
   }
-  rootEl.appendChild(secPol);
+    rootEl.appendChild(secPol);
+  } catch (e) {
+    console.error("renderProfilePreview failed", e);
+    rootEl.innerHTML = "";
+    const msg = el("div", "muted small", `渲染失败：${String(e && e.message ? e.message : e)}`);
+    rootEl.appendChild(msg);
+  }
 }
 
 function toV2ForDisplay(rawCp) {
@@ -636,40 +702,17 @@ function toV2ForDisplay(rawCp) {
 
 function syncProfileFormFromJson(cp) {
   const v2 = ensureV2(cp);
-  $("cp_club_name").value = v2.basics?.name || "";
-  $("cp_city").value = v2.basics?.city || "";
-  $("cp_venues").value = (Array.isArray(v2.venues) ? v2.venues : []).join("\n");
-  $("cp_targets").value = (Array.isArray(v2.audience?.targets) ? v2.audience.targets : []).join("\n");
-
   const prev = $("cpPreview");
   if (prev) renderProfilePreview(prev, v2);
 }
 
 function applyProfileFormToJson(cp) {
-  const out = ensureV2(cp);
-  out.basics = out.basics && typeof out.basics === "object" && !Array.isArray(out.basics) ? out.basics : {};
-  out.audience = out.audience && typeof out.audience === "object" && !Array.isArray(out.audience) ? out.audience : {};
-
-  out.basics.name = $("cp_club_name").value || "";
-  out.basics.city = $("cp_city").value || "";
-  out.venues = normalizeLines($("cp_venues").value);
-  out.audience.targets = normalizeLines($("cp_targets").value);
-  return out;
+  // Legacy no-op: the UI is fully driven by the section editor and optional JSON view.
+  // Keep this function to minimize diff and avoid breaking call sites.
+  return ensureV2(cp);
 }
 
 function wireProfileSync() {
-  const onFormChange = () => {
-    state.clubProfile = applyProfileFormToJson(state.clubProfile);
-    if ($("cpJsonWrap").style.display !== "none") {
-      $("cp_json").value = prettyJson(state.clubProfile);
-    }
-    const prev = $("cpPreview");
-    if (prev) renderProfilePreview(prev, state.clubProfile);
-  };
-  ["cp_club_name", "cp_city", "cp_venues", "cp_targets"].forEach((id) => {
-    $(id).addEventListener("input", onFormChange);
-  });
-
   $("cp_json").addEventListener("input", () => {
     const parsed = safeParseJson($("cp_json").value);
     if (!parsed.ok) return;
@@ -680,30 +723,50 @@ function wireProfileSync() {
 }
 
 async function loadAll() {
-  const data = await apiGet("/admin/api/assets");
-  state.clubProfile = data.club_profile || {};
-  state.faq = data.faq || [];
-  state.prompt = data.system_prompt || "";
-  state.paths = data.paths || {};
-
-  $("scenarioName").textContent = data.scenario || "-";
-  $("pathClub").textContent = state.paths.club_profile || "-";
-  $("pathFaq").textContent = state.paths.faq || "-";
-  $("pathPrompt").textContent = state.paths.system_prompt || "-";
-
-  $("cpPath").textContent = state.paths.club_profile || "-";
-  $("faqPath").textContent = state.paths.faq || "-";
-  $("promptPath").textContent = state.paths.system_prompt || "-";
-
-  state.clubProfile = ensureV2(state.clubProfile);
-  syncProfileFormFromJson(state.clubProfile);
-  $("cp_json").value = prettyJson(state.clubProfile);
   const prev = $("cpPreview");
-  if (prev) renderProfilePreview(prev, state.clubProfile);
+  if (prev && !prev.childElementCount) {
+    prev.innerHTML = "";
+    prev.appendChild(el("div", "muted small", "加载中…"));
+  }
+  const assetStatus = $("assetStatus");
+  if (assetStatus) assetStatus.textContent = "加载中…";
 
-  $("promptText").value = state.prompt;
+  try {
+    const data = await apiGet("/admin/api/assets");
+    state.clubProfile = data.club_profile || {};
+    state.faq = data.faq || [];
+    state.prompt = data.system_prompt || "";
+    state.paths = data.paths || {};
 
-  renderFaq(state.faq, $("faqSearch").value);
+    $("scenarioName").textContent = data.scenario || "-";
+    $("pathClub").textContent = state.paths.club_profile || "-";
+    $("pathFaq").textContent = state.paths.faq || "-";
+    $("pathPrompt").textContent = state.paths.system_prompt || "-";
+
+    $("cpPath").textContent = state.paths.club_profile || "-";
+    $("faqPath").textContent = state.paths.faq || "-";
+    $("promptPath").textContent = state.paths.system_prompt || "-";
+
+    state.clubProfile = ensureV2(state.clubProfile);
+    syncProfileFormFromJson(state.clubProfile);
+    $("cp_json").value = prettyJson(state.clubProfile);
+    if (prev) renderProfilePreview(prev, state.clubProfile);
+    if (assetStatus) assetStatus.textContent = "已加载";
+
+    $("promptText").value = state.prompt;
+
+    renderFaq(state.faq, $("faqSearch").value);
+  } catch (e) {
+    const msg = String(e && e.message ? e.message : e);
+    toast("bad", "加载失败", msg);
+    if (assetStatus) assetStatus.textContent = `失败：${msg}`;
+    if (prev) {
+      prev.innerHTML = "";
+      prev.appendChild(el("div", "muted small", `无法加载资产：${msg}`));
+      prev.appendChild(el("div", "cpTiny", "如提示 401/403，请先重新登录 / 检查 ADMIN_TOKEN 是否配置。"));
+    }
+    throw e;
+  }
 }
 
 function validateFaq(list) {
@@ -727,6 +790,9 @@ function bindTabs() {
 function init() {
   bindTabs();
   wireProfileSync();
+  initGlobalAutoGrow();
+  const jsStatus = $("jsStatus");
+  if (jsStatus) jsStatus.textContent = "已初始化";
 
   $("btnReload").onclick = async () => {
     try {
@@ -752,10 +818,10 @@ function init() {
         if (typeof parsed.value !== "object" || parsed.value === null || Array.isArray(parsed.value)) {
           throw new Error("Club Profile 必须是 JSON 对象");
         }
-        state.clubProfile = parsed.value;
+        state.clubProfile = ensureV2(parsed.value);
         syncProfileFormFromJson(state.clubProfile);
       } else {
-        state.clubProfile = applyProfileFormToJson(state.clubProfile);
+        state.clubProfile = ensureV2(state.clubProfile);
       }
 
       const resp = await apiPutJson("/admin/api/club_profile", state.clubProfile);

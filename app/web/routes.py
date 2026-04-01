@@ -132,7 +132,10 @@ def admin_index() -> Response:
         return redirect(url_for("admin_web.admin_login_page"))
     _require_admin()
     ui_dir = os.path.join(os.path.dirname(__file__), "ui")
-    return send_from_directory(ui_dir, "index.html")
+    resp = send_from_directory(ui_dir, "index.html", max_age=0)
+    # Admin UI changes frequently; avoid stale cached HTML.
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 
 @bp.route("/ui/<path:filename>", methods=["GET"])
@@ -141,7 +144,10 @@ def admin_ui_static(filename: str) -> Response:
         return redirect(url_for("admin_web.admin_login_page"))
     _require_admin()
     ui_dir = os.path.join(os.path.dirname(__file__), "ui")
-    return send_from_directory(ui_dir, filename)
+    resp = send_from_directory(ui_dir, filename, max_age=0)
+    # Prevent cache mismatch between HTML/CSS/JS after small edits.
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 
 @bp.route("/api/assets", methods=["GET"])

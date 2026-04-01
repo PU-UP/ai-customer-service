@@ -182,7 +182,9 @@ body{
   border-color: rgba(124,92,255,.65);
   box-shadow: 0 0 0 4px rgba(124,92,255,.18);
 }
-.textarea{ min-height: 180px; font-family: var(--mono); line-height: 1.45; }
+/* Let JS auto-grow control height; keep a reasonable default minimum. */
+.textarea{ min-height: 54px; font-family: var(--mono); line-height: 1.45; }
+.cpPreview .textarea{ resize: none; }
 
 .stack{ display:flex; flex-direction:column; gap:10px; }
 .inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
