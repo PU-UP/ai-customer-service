@@ -220,7 +220,7 @@ function ensureV2(cp) {
   const youth = coalesce(out.audience?.youth_program, out.youth_program);
 
   return {
-    meta: { schema_version: 2, scenario: "tennis_club" },
+    meta: { schema_version: 2 },
     basics: { name: name || "", city: city || "" },
     venues: Array.isArray(venues) ? venues : [],
     audience: {
@@ -738,7 +738,7 @@ async function loadAll() {
     state.prompt = data.system_prompt || "";
     state.paths = data.paths || {};
 
-    $("scenarioName").textContent = data.scenario || "-";
+    $("assetsDir").textContent = data.assets_dir || "-";
     $("pathClub").textContent = state.paths.club_profile || "-";
     $("pathFaq").textContent = state.paths.faq || "-";
     $("pathPrompt").textContent = state.paths.system_prompt || "-";

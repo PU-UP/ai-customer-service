@@ -42,42 +42,14 @@ def _pick_first_existing_path(candidates: list[str], default_to_first: bool = Tr
     return candidates[0] if candidates and default_to_first else ""
 
 
-SCENARIO = (os.getenv("SCENARIO", "") or "tennis_club").strip() or "tennis_club"
 CHANNEL_DRIVER = (os.getenv("CHANNEL_DRIVER", "") or "wecom_webhook").strip() or "wecom_webhook"
 
-# Prefer local (gitignored) scenarios; fall back to repo examples.
-SCENARIOS_LOCAL_DIR = os.getenv("SCENARIOS_LOCAL_DIR", "").strip() or os.path.join(PROJECT_ROOT, "app", "scenarios_local")
-SCENARIOS_REPO_DIR = os.path.join(PROJECT_ROOT, "app", "scenarios")
-
-def _is_flat_scenarios_dir(base_dir: str) -> bool:
-    """
-    Treat SCENARIOS_LOCAL_DIR as a "flat" assets directory when it directly contains
-    the three asset files (no <SCENARIO>/ subdirectory layout).
-    """
-    if not base_dir:
-        return False
-    return any(
-        os.path.exists(os.path.join(base_dir, fn))
-        for fn in ("club_profile.json", "faq.json", "system_prompt.txt")
-    )
-
-
-def _scenario_candidates(filename: str) -> list[str]:
-    # If the local dir is "flat", prefer <SCENARIOS_LOCAL_DIR>/<filename>.
-    local_first = (
-        [os.path.join(SCENARIOS_LOCAL_DIR, filename)]
-        if _is_flat_scenarios_dir(SCENARIOS_LOCAL_DIR)
-        else [os.path.join(SCENARIOS_LOCAL_DIR, SCENARIO, filename)]
-    )
-    return [
-        *local_first,
-        os.path.join(SCENARIOS_REPO_DIR, SCENARIO, filename),
-    ]
-
-
-def _scenario_path(filename: str) -> str:
-    # Keep old helper name for readability; now it returns the first existing path.
-    return _pick_first_existing_path(_scenario_candidates(filename))
+# All user-owned data lives under USER_WORK_DIR:
+# - <USER_WORK_DIR>/assets: customization assets (flat structure)
+# - <USER_WORK_DIR>/data: runtime data (SQLite, etc.)
+USER_WORK_DIR = os.getenv("USER_WORK_DIR", "").strip() or os.path.join(PROJECT_ROOT, "app", "user_workdir")
+ASSETS_DIR = os.path.join(USER_WORK_DIR, "assets")
+DATA_DIR = os.path.join(USER_WORK_DIR, "data")
 
 
 TOKEN = os.getenv("TOKEN", "")
@@ -113,53 +85,16 @@ ALI_MODEL = LLM_MODEL
 
 DEBUG = str(os.getenv("DEBUG", "") or "").strip().lower() in {"1", "true", "yes", "y", "on"}
 
-SQLITE_PATH = (
-    os.getenv("SQLITE_PATH", "").strip()
-    or _pick_first_existing_path(
-        [
-            os.path.join(PROJECT_ROOT, "app", "data", "ai_customer_service.db"),
-            os.path.join(PROJECT_ROOT, "ai_customer_service.db"),
-        ]
-    )
-)
-
-_club_profile_default = _pick_first_existing_path(
-    [
-        *_scenario_candidates("club_profile.json"),
-        os.path.join(PROJECT_ROOT, "app", "club_profile.json"),
-        os.path.join(PROJECT_ROOT, "club_profile.json"),
-    ]
-)
-CLUB_PROFILE_PATH = os.getenv("CLUB_PROFILE_PATH", "").strip() or _club_profile_default
-
-_faq_default = _pick_first_existing_path(
-    [
-        *_scenario_candidates("faq.json"),
-        os.path.join(PROJECT_ROOT, "app", "faq.json"),
-        os.path.join(PROJECT_ROOT, "faq.json"),
-    ]
-)
-FAQ_PATH = os.getenv("FAQ_PATH", "").strip() or _faq_default
-
-SYSTEM_PROMPT_PATH = os.getenv("SYSTEM_PROMPT_PATH", "").strip() or _pick_first_existing_path(
-    [
-        *_scenario_candidates("system_prompt.txt"),
-        os.path.join(PROJECT_ROOT, "system_prompts.txt"),
-        os.path.join(PROJECT_ROOT, "prompts", "system_prompt.txt"),
-    ]
-)
-
+SQLITE_PATH = os.path.join(DATA_DIR, "ai_customer_service.db")
 
 def scenarios_local_write_dir() -> str:
-    """
-    Where admin UI writes assets:
-    - If SCENARIOS_LOCAL_DIR is flat (contains asset files directly), write into it.
-    - Otherwise, write into SCENARIOS_LOCAL_DIR/<SCENARIO>/.
-    """
-    base = (SCENARIOS_LOCAL_DIR or "").strip()
-    if _is_flat_scenarios_dir(base):
-        return base
-    return os.path.join(base, SCENARIO)
+    # Backward-compatible helper name (used by admin routes).
+    return ASSETS_DIR
+
+
+CLUB_PROFILE_PATH = os.path.join(ASSETS_DIR, "club_profile.json")
+FAQ_PATH = os.path.join(ASSETS_DIR, "faq.json")
+SYSTEM_PROMPT_PATH = os.path.join(ASSETS_DIR, "system_prompt.txt")
 
 WORKER_COUNT = int(os.getenv("WORKER_COUNT", "1") or "1")
 if WORKER_COUNT <= 0:

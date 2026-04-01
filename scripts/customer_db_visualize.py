@@ -5,7 +5,7 @@
 # This script is based on `legacy_versions/db_visualize.py` but updated for
 # the current project layout:
 # - default reads project_root/.env
-# - default SQLite path is taken from SQLITE_PATH or falls back to app/data/ai_customer_service.db
+# - default SQLite path is <USER_WORK_DIR>/data/ai_customer_service.db (or --db PATH)
 
 import os
 import sqlite3
@@ -298,7 +298,7 @@ def _print_help() -> None:
                 "  - 查看数据库结构： python3 scripts/customer_db_visualize.py --schema [--db PATH] [--limit N] [--only TABLE] [--show-sql]",
                 "",
                 "说明：",
-                "  - 默认读取项目根目录 .env（不覆盖已有环境变量），并使用 SQLITE_PATH 或 app/data/ai_customer_service.db",
+                "  - 默认读取项目根目录 .env（不覆盖已有环境变量），并使用 <USER_WORK_DIR>/data/ai_customer_service.db",
                 "  - 默认输出：所有聊过的用户列表（nickname + 最近对话时间）",
                 "  - --user 输出：指定用户完整对话记录（带时间戳）",
                 "",
@@ -483,7 +483,8 @@ def main() -> int:
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     load_dotenv(os.path.join(project_root, ".env"))
 
-    db_path = args["db"] or (os.getenv("SQLITE_PATH", "").strip() or os.path.join(project_root, "app", "data", "ai_customer_service.db"))
+    user_work_dir = (os.getenv("USER_WORK_DIR", "") or "").strip() or os.path.join(project_root, "app", "user_workdir")
+    db_path = args["db"] or os.path.join(user_work_dir, "data", "ai_customer_service.db")
     limit = int(args["limit"] or 10)
     if limit <= 0:
         limit = 10

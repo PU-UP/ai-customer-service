@@ -31,11 +31,9 @@ htmlcov/
 # SQLite runtime DB files (created at runtime)
 *.db
 *.sqlite
-app/data/
-app/data/*.db
 
-# Local scenarios (user-specific assets)
-app/scenarios_local/
+# User workdir (user-owned assets + runtime data)
+app/user_workdir/
 
 # OS / editor
 .DS_Store

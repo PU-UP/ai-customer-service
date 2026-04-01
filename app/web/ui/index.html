@@ -13,11 +13,11 @@
           <div class="brandMark">CS</div>
           <div>
             <div class="brandTitle">AI 客服管理后台</div>
-            <div class="brandSub">编辑当前 SCENARIO 的资产：Club Profile / FAQ / System Prompt</div>
+            <div class="brandSub">编辑本地资产：Club Profile / FAQ / System Prompt</div>
           </div>
         </div>
         <div class="right">
-          <div class="pill">SCENARIO：<strong id="scenarioName">-</strong></div>
+          <div class="pill">Assets Dir：<strong id="assetsDir">-</strong></div>
           <button class="btnGhost" id="btnReload" type="button">重新加载</button>
           <form method="post" action="/admin/logout">
             <button class="btnGhost" type="submit">退出</button>
@@ -73,7 +73,7 @@
                   </div>
                   <div class="divider"></div>
                   <div class="muted small">
-                    保存时会写入：<code>app/scenarios_local/&lt;SCENARIO&gt;/</code> 并触发热加载。
+                    保存时会写入：<code>&lt;USER_WORK_DIR&gt;/assets/</code> 并触发热加载。
                   </div>
                   <div class="divider"></div>
                   <div class="label">FAQ 结构要求</div>

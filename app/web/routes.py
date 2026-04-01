@@ -7,7 +7,7 @@ from typing import Any
 
 from flask import Blueprint, Response, abort, make_response, redirect, request, send_from_directory, url_for
 
-from app.config import CLUB_PROFILE_PATH, FAQ_PATH, SCENARIO, scenarios_local_write_dir, SYSTEM_PROMPT_PATH
+from app.config import ASSETS_DIR, CLUB_PROFILE_PATH, FAQ_PATH, scenarios_local_write_dir, SYSTEM_PROMPT_PATH
 from app.core.logging import log
 from app.core.policy import reload_assets
 
@@ -154,7 +154,7 @@ def admin_ui_static(filename: str) -> Response:
 def api_assets() -> Response:
     _require_admin()
     data = {
-        "scenario": SCENARIO,
+        "assets_dir": (ASSETS_DIR or "").strip(),
         "paths": {
             "club_profile": CLUB_PROFILE_PATH,
             "faq": FAQ_PATH,
@@ -177,7 +177,7 @@ def api_put_club_profile() -> Response:
     out_path = os.path.join(target_dir, "club_profile.json")
     _atomic_write_json(out_path, payload)
     reload_assets()
-    log("admin.assets.saved", {"type": "club_profile", "scenario": SCENARIO, "path": out_path})
+    log("admin.assets.saved", {"type": "club_profile", "path": out_path})
     return _json({"ok": True, "path": out_path})
 
 
@@ -207,7 +207,7 @@ def api_put_faq() -> Response:
     out_path = os.path.join(target_dir, "faq.json")
     _atomic_write_json(out_path, payload)
     reload_assets()
-    log("admin.assets.saved", {"type": "faq", "scenario": SCENARIO, "path": out_path})
+    log("admin.assets.saved", {"type": "faq", "path": out_path})
     return _json({"ok": True, "path": out_path})
 
 
@@ -225,6 +225,6 @@ def api_put_system_prompt() -> Response:
     out_path = os.path.join(target_dir, "system_prompt.txt")
     _atomic_write_text(out_path, content)
     reload_assets()
-    log("admin.assets.saved", {"type": "system_prompt", "scenario": SCENARIO, "path": out_path})
+    log("admin.assets.saved", {"type": "system_prompt", "path": out_path})
     return _json({"ok": True, "path": out_path})
 
