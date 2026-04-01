@@ -352,13 +352,19 @@ function formatPriceMap(map) {
   return parts.join(" / ");
 }
 
-function syncEditorState(nextCp) {
+function syncEditorState(nextCp, opts) {
+  const options = opts && typeof opts === "object" ? opts : {};
+  const rerender = options.rerender === true;
   state.clubProfile = ensureV2(nextCp);
   if ($("cpJsonWrap").style.display !== "none") {
     $("cp_json").value = prettyJson(state.clubProfile);
   }
-  const prev = $("cpPreview");
-  if (prev) renderProfilePreview(prev, state.clubProfile);
+  // Important: do NOT rerender the whole editor on each keystroke,
+  // otherwise the focused input will be recreated and lose cursor.
+  if (rerender) {
+    const prev = $("cpPreview");
+    if (prev) renderProfilePreview(prev, state.clubProfile);
+  }
 }
 
 function renderProfilePreview(rootEl, rawCp) {
@@ -491,7 +497,7 @@ function renderProfilePreview(rootEl, rawCp) {
         del.onclick = () => {
           const nextCards = cards.filter((_, i) => i !== idx);
           const nextCourse = { ...c, cards: nextCards };
-          syncEditorState({ ...cp, courses: cp.courses.map((x) => (x.id === c.id ? nextCourse : x)) });
+          syncEditorState({ ...cp, courses: cp.courses.map((x) => (x.id === c.id ? nextCourse : x)) }, { rerender: true });
         };
         btnRow.appendChild(del);
         box.appendChild(btnRow);
@@ -505,7 +511,7 @@ function renderProfilePreview(rootEl, rawCp) {
       add.onclick = () => {
         const nextCards = [...cards, { name: "新卡", hours: 0, price_aud_per_person: { "4": 0 } }];
         const nextCourse = { ...c, cards: nextCards };
-        syncEditorState({ ...cp, courses: cp.courses.map((x) => (x.id === c.id ? nextCourse : x)) });
+        syncEditorState({ ...cp, courses: cp.courses.map((x) => (x.id === c.id ? nextCourse : x)) }, { rerender: true });
       };
       addRow.appendChild(add);
       card.appendChild(addRow);
