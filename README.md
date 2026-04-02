@@ -45,13 +45,12 @@ chmod +x scripts/start_daemon.sh scripts/stop_daemon.sh
 
 - 若存在 `.venv/bin/python3` 或 `venv/bin/python3`，启动脚本会优先使用；否则使用系统 `python3`。
 - 每次启动前若 `logs/app.log` 已存在且**超过 10 天未修改**或**大于 100MB**，会将当前内容备份为 `logs/app.log.bk`（覆盖旧备份），并清空 `app.log` 再写入新日志。
-- `logs/` 已加入 `.gitignore`，**不会提交到 GitHub**。
 
 ---
 
 ## 2. 两种使用方式
 
-### A) 终端模式（本地调试最快）
+### A) 终端模式（本地调试）
 配置：
 
 ```env
@@ -84,7 +83,7 @@ CHANNEL_DRIVER=wecom_webhook
 
 ---
 
-## 3. 资产目录用法（核心）
+## 3. 资产目录用法
 
 程序只从 `USER_WORK_DIR/assets` 读取定制化资产（扁平结构，不分场景子目录）：
 
