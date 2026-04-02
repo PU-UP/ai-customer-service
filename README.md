@@ -31,6 +31,22 @@ python run_customer_service.py
 
 仅需要根目录启动即可。
 
+### 可选：后台运行与日志
+
+适合服务器上长期跑企业微信 webhook：进程在后台运行，**标准输出与错误**追加写入项目根目录的 `logs/app.log`，进程号写在 `logs/run.pid`。
+
+```bash
+chmod +x scripts/start_daemon.sh scripts/stop_daemon.sh
+./scripts/start_daemon.sh   # 启动
+./scripts/stop_daemon.sh    # 停止
+```
+
+说明：
+
+- 若存在 `.venv/bin/python3` 或 `venv/bin/python3`，启动脚本会优先使用；否则使用系统 `python3`。
+- 每次启动前若 `logs/app.log` 已存在且**超过 10 天未修改**或**大于 100MB**，会将当前内容备份为 `logs/app.log.bk`（覆盖旧备份），并清空 `app.log` 再写入新日志。
+- `logs/` 已加入 `.gitignore`，**不会提交到 GitHub**。
+
 ---
 
 ## 2. 两种使用方式
@@ -113,6 +129,7 @@ app/
 - `.env` 必须放在项目根目录（与 `app/` 同级）
 - 不要提交真实 `.env`（已在 `.gitignore`）
 - `db/` 放的是 Python 代码；数据库文件应在 `data/` 或外部挂载目录
+- 后台运行产生的 `logs/`（含 `app.log`、`run.pid`）请勿提交仓库（已在 `.gitignore`）
 
 ---
 

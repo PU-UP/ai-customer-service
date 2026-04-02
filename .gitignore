@@ -35,6 +35,9 @@ htmlcov/
 # User workdir (user-owned assets + runtime data)
 app/user_workdir/
 
+# Daemon logs & pid (scripts/start_daemon.sh)
+logs/
+
 # OS / editor
 .DS_Store
 .idea/
