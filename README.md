@@ -56,7 +56,7 @@ CHANNEL_DRIVER=wecom_webhook
 ```
 
 并确保以下环境变量正确：
-- `TOKEN`
+- `WECOM_WEBHOOK_TOKEN`（企业微信回调 URL 上配置的 Token，用于签名校验）
 - `ENCODING_AES_KEY`
 - `CORP_ID`
 - `CORP_SECRET`

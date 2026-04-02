@@ -52,7 +52,8 @@ ASSETS_DIR = os.path.join(USER_WORK_DIR, "assets")
 DATA_DIR = os.path.join(USER_WORK_DIR, "data")
 
 
-TOKEN = os.getenv("TOKEN", "")
+# 企业微信「接收消息」回调 URL 上配置的 Token（用于 GET/POST 签名校验）
+WECOM_WEBHOOK_TOKEN = os.getenv("WECOM_WEBHOOK_TOKEN", "")
 ENCODING_AES_KEY = os.getenv("ENCODING_AES_KEY", "")
 CORP_ID = os.getenv("CORP_ID", "")
 CORP_SECRET = os.getenv("CORP_SECRET", "")

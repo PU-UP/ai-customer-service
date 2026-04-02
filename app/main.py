@@ -17,7 +17,7 @@ from app.config import (
     USER_WORK_DIR,
     SQLITE_PATH,
     SYSTEM_PROMPT_PATH,
-    TOKEN,
+    WECOM_WEBHOOK_TOKEN,
     ENCODING_AES_KEY,
     WORKER_COUNT,
     CONV_HISTORY_LIMIT,
@@ -33,7 +33,7 @@ def _print_config_summary() -> None:
         "config.summary",
         {
             "DEBUG": DEBUG,
-            "TOKEN": bool(TOKEN),
+            "WECOM_WEBHOOK_TOKEN": bool(WECOM_WEBHOOK_TOKEN),
             "ENCODING_AES_KEY": bool(ENCODING_AES_KEY),
             "CORP_ID": CORP_ID,
             "CORP_SECRET": bool(CORP_SECRET),

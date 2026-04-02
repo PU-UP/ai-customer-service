@@ -5,7 +5,7 @@ import traceback
 
 from flask import Flask, request
 
-from app.config import CORP_ID, ENCODING_AES_KEY, TOKEN
+from app.config import CORP_ID, ENCODING_AES_KEY, WECOM_WEBHOOK_TOKEN
 from app.core.logging import log, log_separator, set_log_trace
 from app.core.utils import now_ts
 from app.core.worker import enqueue_kf_msg_or_event
@@ -37,7 +37,7 @@ def wechat_verify():
         return "missing params", 400
 
     try:
-        local_signature = sha1_signature(TOKEN, timestamp, nonce, echostr)
+        local_signature = sha1_signature(WECOM_WEBHOOK_TOKEN, timestamp, nonce, echostr)
         if not hmac.compare_digest(local_signature, msg_signature):
             return "signature error", 403
         plain_text = decrypt_wecom_message(ENCODING_AES_KEY, CORP_ID, echostr)
@@ -72,7 +72,7 @@ def wechat_callback():
         log_separator("CALL webhook", {"timestamp": timestamp, "nonce": nonce})
 
         encrypt_text = extract_encrypt_from_xml(raw_xml)
-        local_signature = sha1_signature(TOKEN, timestamp, nonce, encrypt_text)
+        local_signature = sha1_signature(WECOM_WEBHOOK_TOKEN, timestamp, nonce, encrypt_text)
         if not hmac.compare_digest(local_signature, msg_signature):
             log("wecom.webhook.signature_failed", {})
             return "signature error", 403
